@@ -16,13 +16,13 @@
 ## 注意事项
 
 需要的python包：
-    pip install msgpack
-    pip install ujson
-    pip install nonebot
-    pip install nonebot[scheduler]
-    pip install fastapi
-    pip install tweepy
-    pip install pillow
+    pip install msgpack  
+    pip install ujson  
+    pip install nonebot  
+    pip install nonebot[scheduler]  
+    pip install fastapi  
+    pip install tweepy  
+    pip install pillow  
     pip install splinter
 
 需要酷Q PRO
