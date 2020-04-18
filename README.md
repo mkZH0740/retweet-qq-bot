@@ -15,7 +15,7 @@
 
 ## 注意事项
 
-需要的python包：
+需要的python包：  
     pip install msgpack  
     pip install ujson  
     pip install nonebot  
