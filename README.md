@@ -30,3 +30,5 @@
 需要根据电脑上的Chrome版本更改fastapiServer/bin中chromedriver.exe的版本
 
 需要自己申请twitter developer账户并创建自己的app，申请自己的百度翻译app，然后替换bot3.3/addon/utils.py中对应的项目
+
+请按照QQ机器人的help文档输入命令，对于服务端的请求格式可以参考fastapiServer\\test\\t.py，也可以直接访问fastapi提供的本地文档服务器
