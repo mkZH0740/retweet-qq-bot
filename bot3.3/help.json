@@ -1,8 +1,0 @@
-{
-  "all": "输入#help <命令名> 获得对应命令的帮助；目前支持的命令为：\n#restart 重启监听流\n#disable 关闭功能\n#enable 启动功能\n#tr 翻译嵌字\n#style 修改样式",
-  "restart": "重启监听流，用于刷新新加入的监听用户",
-  "disable": "关闭功能，可以同时关闭和开启多个，支持的功能为 [comment,retweet,tweet,translation,content] 对应 翻译，转推，发推，原文翻译，附件；命令格式为#disable <命令>或#disable <命令1>;<命令2>;...",
-  "enable": "开启功能，可以同时关闭和开启多个，支持的功能为 [comment,retweet,tweet,translation,content] 对应 翻译，转推，发推，原文翻译，附件；命令格式为#enable <命令>或#enable <命令1>;<命令2>;...",
-  "tr": "嵌字，第一次输入#tr <嵌字编号>或#tr <网址>;<推特种类：发推1，转推2，评论3>，第二次输入翻译文本，翻译文本的格式为\n#1 <文本>\n#3 <文本>\n 为第1与第3行加入翻译",
-  "style": "修改嵌字的样式，使用css属性，#style <css属性串>"
-}
