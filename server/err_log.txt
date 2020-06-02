@@ -1,0 +1,7 @@
+
+
+url: https://mobile.twitter.com/mkZH0740/status/1267941929423040512; tw_type: 1
+translation: 测试！
+processed: ['测试！']
+style: font-family=黑体;font-size=28px;color:black;
+error: None
