@@ -132,7 +132,7 @@ async def disable(session: CommandSession):
 
 @on_command("no-report", aliases=("no",), only_to_me=False)
 async def no_report(session: CommandSession):
-    prev: bool = await read_group_settings(session.ctx['group_id'])["no-report"]
+    prev: bool = read_group_settings(session.ctx['group_id'])["no-report"]
     adjust_group_settings(session.ctx['group_id'], {"no-report": not prev})
     await session.send("成功！")
 
