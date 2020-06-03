@@ -84,6 +84,7 @@ class DatabaseProcessor:
 
     async def read_group_log(self, group_id: int, index: int):
         db = sqlite3.connect(self.group_log_db)
+        db.execute(f'CREATE TABLE IF NOT EXISTS "{group_id}" ("url" String, "tw_type" INTEGER)')
         res = db.execute(f'SELECT * FROM "{group_id}"').fetchall()
         if index < len(res):
             db.close()

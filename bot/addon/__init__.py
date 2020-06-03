@@ -76,7 +76,7 @@ async def get_translation(session: CommandSession):
         session.state["index"] = int(session.current_arg_text.strip()) - 1
         session.get("translation", prompt="请输入翻译！")
     else:
-        buf = await database_processor.read_group_log(session.ctx['group_id'], session.state['index'])
+        buf = database_processor.read_group_log(session.ctx['group_id'], session.state['index'])
         if buf is None:
             await session.send("index超出范围，请检查！")
         else:
