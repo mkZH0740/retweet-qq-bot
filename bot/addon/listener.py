@@ -25,7 +25,7 @@ class Listener(StreamListener):
         self.followed_users = [str(user[1]) for user in self.database_processor.read_all_users()]
         self.err_list = []
         print(f"INITIALIZATION:{self.followed_users}")
-
+    
     def regenerate_followed_list(self):
         self.followed_users = [str(user[1]) for user in self.database_processor.read_all_users()]
 

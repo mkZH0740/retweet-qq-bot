@@ -147,6 +147,7 @@ class DatabaseProcessor:
             user_data = [screen_name, user_id, str(group_id) + ","]
             db.execute(f'INSERT INTO "users" VALUES {tuple(user_data)}')
         else:
+            user_data = list(user_data)
             user_data[2] = user_data[2] + str(group_id) + ","
             db.execute(f'UPDATE "users" SET groups = "{user_data[2]}" WHERE screen_name = "{screen_name}"')
         db.commit()

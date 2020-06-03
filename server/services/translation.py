@@ -33,7 +33,6 @@ async def add_translation(translation: str, style: str, url: str, tw_type: int) 
 
     fullscreen(driver)
 
-    bound = getPosAndText(driver, tw_type)["location"]
     if tw_type == 3:
         processed_translation = process_multiple(translation)
         res = add_translation_js(driver, processed_translation, style, tw_type)
@@ -45,5 +44,6 @@ async def add_translation(translation: str, style: str, url: str, tw_type: int) 
         return {"status": False, "reason": "error during executing js script!"}
     else:
         logging(translation, processed_translation, style, url, tw_type, res["error"])
-
+    
+    bound = getPosAndText(driver, tw_type)["location"]
     return {"status": True, "filename": crop_screenshot(driver, bound)}
