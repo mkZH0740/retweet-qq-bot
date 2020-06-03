@@ -177,7 +177,8 @@ async def _():
             retry_times = 0
             while retry_times < 3:
                 try:
-                    await bot.send_group_msg(group_id=group, message=MessageSegment.image(f"file:///{tweet['filename']}"))
+                    if tweet['filename'] is not None:
+                        await bot.send_group_msg(group_id=group, message=MessageSegment.image(f"file:///{tweet['filename']}"))
                     await bot.send_group_msg(group_id=group, message=text)
                     break
                 except ActionFailed:

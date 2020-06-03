@@ -9,6 +9,7 @@ from .utils import getPosAndText, fullscreen, crop_screenshot
 
 option = ChromeOptions()
 option.headless = True
+option.add_argument("--disable-gpu")
 driver = Chrome(executable_path=f"{ROOT_PATH}server\\bin\\chromedriver.exe", options=option)
 driver.set_window_size(1080, 1920)
 

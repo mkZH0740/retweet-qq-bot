@@ -78,7 +78,8 @@ class Listener(StreamListener):
                 print(content['reason'])
                 retry_times += 1
         if not retry_times < 3:
-            return
+            content['filename'] = None
+            content['text'] = "未知截图错误！"
 
         tweet = {
             "url": url,

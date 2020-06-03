@@ -6,6 +6,7 @@ ROOT_PATH = "C:\\Users\\mike\\Desktop\\workspace\\proj4\\src\\server\\"
 
 option = ChromeOptions()
 option.headless = True
+option.add_argument("--disable-gpu")
 driver = Chrome(executable_path=f"{ROOT_PATH}bin\\chromedriver.exe", options=option)
 # https://mobile.twitter.com/ars_almal/status/1267158596325797894
 # https://mobile.twitter.com/ars_almal/status/1267498482618654720

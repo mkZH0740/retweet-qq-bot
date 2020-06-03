@@ -22,11 +22,15 @@ secretKey = 'your baidu translation secret key'
 
 def add_translation(data: dict):
     res = requests.post(url=f"{SERVER_ADDRESS}add_translation", json=data).content.decode("utf-8")
+    if res is None:
+        return {"status": False, "reason": "WTF???"}
     return json.loads(res)
 
 
 def get_screenshot(data:dict):
     res = requests.post(url=f"{SERVER_ADDRESS}get_screenshot", json=data).content.decode("utf-8")
+    if res is None:
+        return {"status": False, "reason": "WTF???"}
     return json.loads(res)
 
 
