@@ -25,6 +25,7 @@ async def add_translation(translation: str, style: str, url: str, tw_type: int) 
     option.headless = True
     driver = Chrome(executable_path=f"{ROOT_PATH}server\\bin\\chromedriver.exe", options=option)
     driver.get(url)
+    driver.set_window_size(1080, 1920)
     try:
         WebDriverWait(driver, 8).until(lambda x: x.find_element_by_css_selector('article>div'))
     except TimeoutException:

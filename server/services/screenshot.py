@@ -10,7 +10,7 @@ from .utils import getPosAndText, fullscreen, crop_screenshot
 option = ChromeOptions()
 option.headless = True
 driver = Chrome(executable_path=f"{ROOT_PATH}server\\bin\\chromedriver.exe", options=option)
-
+driver.set_window_size(1080, 1920)
 
 def get_screenshot(url: str, tw_type: int) -> dict:
     """
