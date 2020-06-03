@@ -82,7 +82,7 @@ class DatabaseProcessor:
     group_log_db = f"{ROOT_PATH}bin\\logs.db"
     config_log_db = f"{ROOT_PATH}bin\\configs.db"
 
-    async def read_group_log(self, group_id: int, index: int):
+    def read_group_log(self, group_id: int, index: int):
         db = sqlite3.connect(self.group_log_db)
         db.execute(f'CREATE TABLE IF NOT EXISTS "{group_id}" ("url" String, "tw_type" INTEGER)')
         res = db.execute(f'SELECT * FROM "{group_id}"').fetchall()
@@ -143,7 +143,7 @@ class DatabaseProcessor:
     def add_user(self, screen_name: str, user_id: str, group_id: int):
         db = sqlite3.connect(self.config_log_db)
         user_data: list = db.execute(f'SELECT * FROM "users" WHERE screen_name = "{screen_name}"').fetchone()
-        if len(user_data) == 0:
+        if user_data is None:
             user_data = [screen_name, user_id, str(group_id) + ","]
             db.execute(f'INSERT INTO "users" VALUES {tuple(user_data)}')
         else:
