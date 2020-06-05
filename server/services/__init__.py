@@ -24,8 +24,9 @@ class TranslationModel(BaseModel):
 
 
 @router.post("/get_screenshot")
-def screenshot(data: ScreenshotModel):
-    return get_screenshot(data.url, data.tw_type)
+async def screenshot(data: ScreenshotModel):
+    res = await get_screenshot(data.url, data.tw_type)
+    return res
 
 
 @router.post("/add_translation")

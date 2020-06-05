@@ -42,6 +42,7 @@ class Listener(StreamListener):
         group_configs = {}
         for group in groups:
             group_configs[group] = read_group_settings(group)
+
         if hasattr(status, "retweeted_status"):
             # retweet
             for group in groups:
@@ -64,6 +65,9 @@ class Listener(StreamListener):
                     group_configs.pop(group)
             tw_type = 1
 
+        if len(groups) < 0:
+            return
+
         pic_urls = []
         if hasattr(status, 'extended_entities'):
             for pic in status.extended_entities['media']:
@@ -77,9 +81,10 @@ class Listener(StreamListener):
             else:
                 print(content['reason'])
                 retry_times += 1
+
         if not retry_times < 3:
             content['filename'] = None
-            content['text'] = "未知截图错误！"
+            content['text'] = content['reason']
 
         tweet = {
             "url": url,

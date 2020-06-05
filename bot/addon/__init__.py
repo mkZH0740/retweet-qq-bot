@@ -16,7 +16,7 @@ auth = tweepy.OAuthHandler(__c_k__, __c_s__)
 auth.set_access_token(__A_T__, __A_S__)
 api = tweepy.API(auth)
 my_listener = Listener(api=api)
-stream_holder = ['author: sudo & sorehait']
+stream_holder = ['author: sudo & SoreHait']
 stream_holder[0] = tweepy.Stream(api.auth, my_listener)
 stream_holder[0].filter(follow=my_listener.followed_users, is_async=True)
 
@@ -61,13 +61,10 @@ async def adj_style(session: CommandSession):
 async def get_help(session: CommandSession):
     with open(f"{ROOT_PATH}bin\\help.json", "r", encoding="utf-8") as f:
         res: dict = json.load(f)
-    if session.current_arg_text.strip() != "":
-        if session.current_arg_text not in res.keys():
-            await session.send("未找到该命令！")
-        else:
-            await session.send(res[session.current_arg_text])
-    else:
+    if session.current_arg_text.strip() not in res.keys():
         await session.send(res["general"])
+    else:
+        await session.send(res[session.current_arg_text.strip()])
 
 
 @on_command("translate", aliases=("tr",), only_to_me=False)
@@ -153,10 +150,12 @@ async def _():
         while len(my_listener.err_list) > 0:
             err = my_listener.err_list.pop()
             await bot.send_private_msg(user_id=2267980149, message=f"工口发生！\n{err}")
+
     for i in range(limit):
         filename = cached_files.pop()
         if not os.path.exists(f"{ROOT_PATH}cache\\{filename}"):
             continue
+
         with open(f"{ROOT_PATH}cache\\{filename}", "r", encoding="utf-8") as f:
             tweet = json.load(f)
 
@@ -164,6 +163,7 @@ async def _():
             index = database_processor.add_group_log(group, tweet['url'], tweet['tw_type'])
             text = f"嵌字编号：{index}"
             current_group_config = tweet['group_configs'][str(group)]
+
             if not current_group_config['no-report']:
                 text = f"原文：{tweet['text']}\n"
                 if current_group_config['translation']:
@@ -178,17 +178,23 @@ async def _():
             while retry_times < 3:
                 try:
                     if tweet['filename'] is not None:
-                        await bot.send_group_msg(group_id=group, message=MessageSegment.image(f"file:///{tweet['filename']}"))
-                    await bot.send_group_msg(group_id=group, message=text)
+                        await bot.send_group_msg(group_id=group, message=MessageSegment.image(
+                            f"file:///{tweet['filename']}"))
+                    await bot.send_group_msg(group_id=group, message=text
+                                             .encode("utf-16", "surrogatepass").decode("utf-16"))
                     break
                 except ActionFailed:
                     retry_times += 1
+
             if not retry_times < 3:
                 logger.warning(f"SEND TO GROUP:{group} FAILED SKIPPED!")
 
         if os.path.exists(f"{ROOT_PATH}cache\\{filename}"):
             os.remove(f"{ROOT_PATH}cache\\{filename}")
-        os.remove(tweet['filename'])
+        if tweet['filename'] is not None:
+            os.remove(tweet['filename'])
+
+
 '''
 tweet = {
             "url": url,

@@ -10,41 +10,48 @@ browser = Chrome(executable_path=f"{ROOT_PATH}server\\bin\\chromedriver.exe", op
 browser.get(f"{ROOT_PATH}server\\bin\\temp.html")
 
 
-def _get_twemoji_id(buf: str) -> list:
-    args = []
-    curr = ""
+def translate_twemoji_emoji(buf: str) -> str:
+    buffer = re.finditer(r"{\S+?}", buf)
+    res = []
+    previous_end = 0
+    for each in buffer:
+        if each.span()[0] != previous_end:
+            res.append(buf[previous_end: each.span()[0]])
+        emoji_code = str(browser.execute_script("return twemoji.convert.fromCodePoint(arguments[0]);",
+                                                buf[each.span()[0] + 1: each.span()[1] - 1]))
+        res.append(emoji_code)
+        previous_end = each.span()[1]
+    if previous_end != len(buf):
+        res.append(buf[previous_end:])
+    return "".join(res)
+
+
+def translate_emoji_twemoji(buf: str) -> str:
+    to_change = {}
     for i in range(len(buf)):
         if '\U00010000' < buf[i] < '\U0010ffff':
-            if len(curr) > 0:
-                args.append(curr)
-                args.append(buf[i])
-                curr = ""
-            else:
-                args.append(buf[i])
-        else:
-            curr += buf[i]
-            if i == len(buf) - 1:
-                args.append(curr)
+            twemoji_code = str(browser.execute_script("return twemoji.convert.toCodePoint(arguments[0]);",
+                                                      buf[i]))
+            to_change[buf[i]] = "{" + twemoji_code + "}"
+    for key in to_change.keys():
+        buf = buf.replace(key, to_change[key])
+    return buf
 
-    for i in range(len(args)):
-        if '\U00010000' < args[i] < '\U0010ffff':
-            args[i] = "{emj}" + browser.execute_script("return grabTheRightIcon(arguments[0])", args[i])
-    return args
-    
 
-def process_multiple(block: str) -> list:
+def process_multiple(block: str) -> dict:
     buffer = re.findall(r"((?P<index>#\d+ )(?P<content>\S+))", block)
     if len(buffer) == 0:
         return None
     else:
-        # [('#1 测试2#234', '#1 ', '测试2#234'), ('#3 测试3', '#3 ', '测试3')]
-        # process emjs
-        res = []
+        res = {}
         for each in buffer:
-            current_line = [each[1], _get_twemoji_id(each[2])]
-            res.append(current_line)
+            res[each[1][1:].strip()] = translate_emoji_twemoji(each[2])
+        res['max'] = int(max(res.keys()))
         return res
 
 
-def process_single(block: str) -> list:
-    return _get_twemoji_id(block)
+def process_single(block: str) -> dict:
+    return {
+        'max': 1,
+        '1': translate_emoji_twemoji(block)
+    }

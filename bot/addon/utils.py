@@ -21,17 +21,19 @@ secretKey = 'your baidu translation secret key'
 
 
 def add_translation(data: dict):
-    res = requests.post(url=f"{SERVER_ADDRESS}add_translation", json=data).content.decode("utf-8")
-    if res is None:
-        return {"status": False, "reason": "WTF???"}
-    return json.loads(res)
+    try:
+        res = requests.post(url=f"{SERVER_ADDRESS}add_translation", json=data).content.decode("utf-8")
+        return json.loads(res)
+    except json.JSONDecodeError:
+        return {"status": False, "reason": "服务器错误，无法完成该指令"}
 
 
 def get_screenshot(data:dict):
-    res = requests.post(url=f"{SERVER_ADDRESS}get_screenshot", json=data).content.decode("utf-8")
-    if res is None:
-        return {"status": False, "reason": "WTF???"}
-    return json.loads(res)
+    try:
+        res = requests.post(url=f"{SERVER_ADDRESS}get_screenshot", json=data).content.decode("utf-8")
+        return json.loads(res)
+    except json.JSONDecodeError:
+        return {"status": False, "reason": "服务器错误，无法完成该指令"}
 
 
 def read_group_settings(group_id: int):
@@ -156,6 +158,7 @@ class DatabaseProcessor:
             db.execute(f'UPDATE "users" SET groups = "{user_data[2]}" WHERE screen_name = "{screen_name}"')
         db.commit()
         db.close()
+
 
 def trans(transstr: str):
     httpClient = None

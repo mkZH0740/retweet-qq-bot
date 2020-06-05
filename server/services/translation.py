@@ -29,22 +29,30 @@ async def add_translation(translation: str, style: str, url: str, tw_type: int) 
     try:
         WebDriverWait(driver, 8).until(lambda x: x.find_element_by_css_selector('article>div'))
     except TimeoutException:
+        driver.quit()
         return {"status": False, "reason": "tweet may be deleted!"}
     time.sleep(0.5)
 
     fullscreen(driver)
 
     if tw_type == 3:
-        processed_translation = process_multiple(translation)
-        res = add_translation_js(driver, processed_translation, style, tw_type)
+        processed = process_multiple(translation)
     else:
-        processed_translation = process_single(translation)
-        res = add_translation_js(driver, processed_translation, style, tw_type)
-    if res["error"] is not None:
-        logging(translation, processed_translation, style, url, tw_type, res["error"])
-        return {"status": False, "reason": "error during executing js script!"}
+        processed = process_single(translation)
+
+    last_index = processed.pop('max')
+    res = add_translation_js(driver, processed, style, last_index)
+
+    if res is None:
+        result = getPosAndText(driver, tw_type)
+        if 'error' in result:
+            driver.quit()
+            return {"status": False, "reason": result['error']}
+        buf = result['position']
+        bound = (buf['left'], buf['top'], buf['right'], buf['bottom'])
+        filename = crop_screenshot(driver, bound)
+        driver.quit()
+        return {"status": True, "filename": filename}
     else:
-        logging(translation, processed_translation, style, url, tw_type, res["error"])
-    
-    bound = getPosAndText(driver, tw_type)["location"]
-    return {"status": True, "filename": crop_screenshot(driver, bound)}
+        driver.quit()
+        return {'status': False, "reason": res}
