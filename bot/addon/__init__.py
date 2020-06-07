@@ -62,6 +62,7 @@ async def get_help(session: CommandSession):
     with open(f"{ROOT_PATH}bin\\help.json", "r", encoding="utf-8") as f:
         res: dict = json.load(f)
     if session.current_arg_text.strip() not in res.keys():
+        # 当前查找的命令不存在，发送存在的命令的简介
         await session.send(res["general"])
     else:
         await session.send(res[session.current_arg_text.strip()])
@@ -71,6 +72,7 @@ async def get_help(session: CommandSession):
 async def get_translation(session: CommandSession):
     if session.is_first_run:
         session.state["index"] = int(session.current_arg_text.strip()) - 1
+        # 获取嵌字文本
         session.get("translation", prompt="请输入翻译！")
     else:
         buf = database_processor.read_group_log(session.ctx['group_id'], session.state['index'])
@@ -98,6 +100,7 @@ async def add_new_user(session: CommandSession):
         if not ops[1].isdigit():
             session.finish("错误参数，提示：screen_name在前，id在后！")
         database_processor.add_user(ops[0], ops[1], session.ctx['group_id'])
+        # 重启监听流
         stream_holder[0].disconnect()
         my_listener.regenerate_followed_list()
         stream_holder[0] = tweepy.Stream(api.auth, my_listener)
@@ -137,34 +140,39 @@ async def no_report(session: CommandSession):
 @scheduler.scheduled_job('interval', seconds=60)
 async def _():
     cached_files = os.listdir(f"{ROOT_PATH}cache\\")
+    # 最多一分钟处理6个
     limit = 6
     if len(cached_files) < limit:
         limit = len(cached_files)
     if len(my_listener.err_list) > 0:
-
+        # 流出错，重启监听流
         stream_holder[0].disconnect()
         my_listener.regenerate_followed_list()
         stream_holder[0] = tweepy.Stream(api.auth, my_listener)
         stream_holder[0].filter(follow=my_listener.followed_users, is_async=True)
-
+        # 向管理员发送错误信息
         while len(my_listener.err_list) > 0:
             err = my_listener.err_list.pop()
             await bot.send_private_msg(user_id=2267980149, message=f"工口发生！\n{err}")
 
     for i in range(limit):
+        # tweet内容.json文件名
         filename = cached_files.pop()
         if not os.path.exists(f"{ROOT_PATH}cache\\{filename}"):
+            # 当前读取的文件被删除，跳过这次循环
             continue
 
         with open(f"{ROOT_PATH}cache\\{filename}", "r", encoding="utf-8") as f:
             tweet = json.load(f)
 
         for group in tweet['groups']:
+            # 加入group_log
             index = database_processor.add_group_log(group, tweet['url'], tweet['tw_type'])
             text = f"嵌字编号：{index}"
             current_group_config = tweet['group_configs'][str(group)]
 
             if not current_group_config['no-report']:
+                # 需要其他内容
                 text = f"原文：{tweet['text']}\n"
                 if current_group_config['translation']:
                     text += f"翻译：{trans(tweet['text'])}\n"
@@ -178,8 +186,11 @@ async def _():
             while retry_times < 3:
                 try:
                     if tweet['filename'] is not None:
+                        # 由于网络原因图片可能发送失败，所以多次重试
+                        # 如果bot被禁言显示错误是一样的，所以尝试3次后直接跳过，以免卡住
                         await bot.send_group_msg(group_id=group, message=MessageSegment.image(
                             f"file:///{tweet['filename']}"))
+                    # 文本中可能携带surrogates（emoji），需要先用utf-16编码解码一次才可以发送
                     await bot.send_group_msg(group_id=group, message=text
                                              .encode("utf-16", "surrogatepass").decode("utf-16"))
                     break
@@ -187,11 +198,14 @@ async def _():
                     retry_times += 1
 
             if not retry_times < 3:
+                # 发送出现问题，重试没能成功处理
                 logger.warning(f"SEND TO GROUP:{group} FAILED SKIPPED!")
 
         if os.path.exists(f"{ROOT_PATH}cache\\{filename}"):
+            # 文件可能已被移除
             os.remove(f"{ROOT_PATH}cache\\{filename}")
         if tweet['filename'] is not None:
+            # 文件可能已被移除
             os.remove(tweet['filename'])
 
 
