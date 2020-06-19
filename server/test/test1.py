@@ -1,34 +1,14 @@
-import time
+import requests
 
-from selenium.webdriver import Chrome, ChromeOptions
+server = "http://127.0.0.1:8000"
 
-ROOT_PATH = "C:\\Users\\mike\\Desktop\\workspace\\proj4\\src\\server\\"
+data = {
+    "url": "https://twitter.com/natsuiromatsuri/status/1272210188871712769",
+    "style": "font-family: 黑体;font-size: 28px;color: yellow",
+    "tag": "C:\\Users\\mike\\WebstormProjects\\server\\pics\\wheel.png",
+    "translation": "#1 测试🏮\n#2 我有一句话一定要说！❄❄\n",
+    "code": 1
+}
+res = requests.post(f"{server}/translation", json=data)
+print(res.content.decode("utf-8"))
 
-option = ChromeOptions()
-option.headless = True
-option.add_argument("--disable-gpu")
-driver = Chrome(executable_path=f"{ROOT_PATH}bin\\chromedriver.exe", options=option)
-# https://mobile.twitter.com/ars_almal/status/1267158596325797894
-# https://mobile.twitter.com/ars_almal/status/1267498482618654720
-driver.get("https://stackoverflow.com/questions/43541925/how-to-set-the-browser-window-size-when-using-google-chrome-headless")
-time.sleep(2)
-width = driver.execute_script('return Math.max(document.body.scrollWidth, document.body.offsetWidth);')
-height = driver.execute_script('return Math.max(document.body.scrollHeight, document.body.offsetHeight);')
-# driver.set_window_size(width, height)
-# # scroll to top as the position is in the middle of the page
-# driver.execute_script('window.scrollTo(document.body.scrollHeight, 0)')
-
-prev_window_size = driver.get_window_size()
-if prev_window_size['height'] > height:
-    height = prev_window_size['height']
-if prev_window_size['width'] > width:
-    width = prev_window_size['width']
-driver.set_window_size(width, height)
-
-driver.save_screenshot("test.png")
-
-# with open("getMainPart.js", "r", encoding="utf-8") as f:
-#     script = f.read()
-
-# print(script + "return getMainPartComment()")
-# res = driver.execute_script(script + "return getMainPartComment()")

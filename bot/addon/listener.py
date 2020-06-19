@@ -127,10 +127,12 @@ class Listener(StreamListener):
 
     def on_delete(self, status_id, user_id):
         # 用户删除了这条推文，删除还没有被处理的数据文件
+        if str(user_id) not in self.followed_users:
+            return True
         if os.path.exists(f"{ROOT_PATH}cache//{status_id}.json"):
             os.remove(f"{ROOT_PATH}cache//{status_id}.json")
         else:
-            print(f"{status_id} already gone!")
+            print(f"{user_id}//{status_id} already gone!")
         return True
 
     def on_error(self, status_code):
