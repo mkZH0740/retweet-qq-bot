@@ -1,9 +1,0 @@
-{
-  "style": "#style(st) <字体>;<字号>;<颜色>，字体：字体名，字号：例 -> 28px，颜色：css样式支持的颜色格式，用于修改当前的样式",
-  "help": "#help(h) 或#help(h) <命令名>，获取帮助",
-  "general": "#[命令名](可用的缩写) <参数>\n#style(st) <字体>;<字号>;<颜色>\n#help(h) || #help(h) <命令名>\n#translate(tr) <嵌字编号>\n#add <推特用户个人页面@后面的名字>;<推特用户的id>\n",
-  "translate": "#translate(tr) <嵌字编号>，输入命令后再输入翻译文本。回复的翻译应当用\n#<行号> 文本\n 的形式指定行数，现在在翻译文本中使用的emoji会自动翻译成推特上的emoji了",
-  "add": "#add <推特用户个人页面@后面的名字>;<推特用户的id>，id可以在谷歌上搜索twitter id寻找网站获取",
-  "enable": "#enable(en) <选项>;......，将所有命令后的选项置为true，可用选项：tweet, retweet, comment, translation, content, no-report，其中translation对应发推内容的翻译，content对应发推内容的图片，no-report启用后将只会发送截图和嵌字编号",
-  "disable": "#disable(dis) <选项>:......，enable的反义词"
-}
