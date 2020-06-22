@@ -1,0 +1,14 @@
+{
+    "server-url": "http://127.0.0.1:8000",
+    "project-path": "C:\\Users\\mike\\Desktop\\newProject",
+    "twitter-api": {
+        "consumer-key": "",
+        "consumer-secret": "",
+        "access-token-key": "",
+        "access-token-secret": ""
+    },
+    "baidu-translation": {
+        "api": "",
+        "secret": ""
+    }
+}

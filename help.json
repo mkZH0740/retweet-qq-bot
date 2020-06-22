@@ -1,0 +1,10 @@
+{
+    "default": "目前已支持命令：enable, disable, translation, style, add, help, tag;\n <>必选参数，[]可选参数",
+    "tag": "指定嵌字的标签图片，用法：#tag <图片>",
+    "help": "需求帮助文件，用法：#help [命令]",
+    "add": "增加监听对象，用法：#add <screen name>;<user id>",
+    "style": "编辑嵌字样式，用法：#style <css样式>",
+    "translation": "缩写tr，用法：#tr <嵌字编号>，随后再输入翻译块，嵌评论推时请使用 #1 嵌字内容\n#2 嵌字内容\n来指定第1，2行的内容",
+    "disable": "关闭对应内容，用法：#disable <命令1>;[命令2];....，支持：tweet，retweet，comment，translation，content，no-report",
+    "enbale": "打开对应内容，用法：#enable <命令1>;[命令2];....，支持：tweet，retweet，comment，translation，content，no-report"
+}
