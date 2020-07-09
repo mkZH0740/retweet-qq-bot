@@ -105,3 +105,6 @@ class MyListener(StreamListener):
 
     def on_warning(self, notice):
         self.errList.append(f"服务器警告：{notice}")
+
+    def on_exception(self, exception):
+        self.errList.append(f"抛出异常：{exception}")

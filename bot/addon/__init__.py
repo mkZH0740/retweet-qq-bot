@@ -22,6 +22,16 @@ stream_holder[0] = Stream(api.auth, currListener)
 stream_holder[0].filter(follow=currListener.followedUsers, is_async=True)
 
 
+async def my_send_group_msg(group_id: int, message: str):
+    try:
+        await bot.send_group_msg(group_id=group_id, message=message)
+    except ActionFailed as e:
+        if e.retcode != -34:
+            await bot.send_group_msg(group_id=group_id, message="发送失败")
+        else:
+            print(f"在{group_id}被禁言！")
+
+
 @on_command("help", only_to_me=False)
 async def commandHelp(session: CommandSession):
     with open(f"{PROJECT_PATH}\\help.json", "r", encoding="utf-8") as f:
@@ -94,26 +104,31 @@ async def _():
     cachedLogs = os.listdir(f"{TWEET_LOG_PATH}\\")
     limit = min(5, len(cachedLogs))
     if len(currListener.errList) > 0:
+        bufferedErrlist = []
+        while len(currListener.errList) > 0:
+            bufferedErrlist.append(currListener.errList.pop())
         stream_holder[0].disconnect()
         currListener.regenerate_followed_users()
         stream_holder[0] = Stream(api.auth, currListener)
         stream_holder[0].filter(follow=currListener.followedUsers, is_async=True)
-        await bot.send_private_msg(user_id=2267980149, message=f"出现错误 => {currListener.errList}")
-        currListener.errList.clear()
+        await bot.send_private_msg(user_id=2267980149, message=f"出现错误 => {bufferedErrlist}")
     
     for i in range(limit):
         tweetLogFile = cachedLogs.pop()
         tweetLogPath = f"{TWEET_LOG_PATH}\\{tweetLogFile}"
         if not os.path.exists(tweetLogPath):
             continue
+
         with open(tweetLogPath, "r", encoding="utf-8") as f:
             tweetContent = json.load(f)
-        
+        os.remove(tweetLogPath)
+
         groups = [int(group) for group in tweetContent["groups"]]
+
         if tweetContent["screenshotPath"] is None:
             errMessage = f"遇到错误 => {tweetContent['url']}处发生了{tweetContent['rawText']}"
             for group in groups:
-                await bot.send_group_msg(group_id=group, message=errMessage)
+                await my_send_group_msg(group_id=group, message=errMessage)
         else:
             screenshotMsg = str(MessageSegment.image(f"file:///{tweetContent['screenshotPath']}"))
             mediaContentMsg = "".join([str(MessageSegment.image(url)) for url in tweetContent['mediaUrls']])
@@ -131,11 +146,7 @@ async def _():
                 currMsg += f"嵌字编号：{index}"
                 currMsg = currMsg.encode("utf-16", "surrogatepass").decode("utf-16")
 
-                try:
-                    await bot.send_group_msg(group_id=group, message=currMsg)
-                except ActionFailed as e:
-                    await bot.send_group_msg(group_id=group, message=f"发送失败，错误代码：{e.retcode}")
-        if os.path.exists(tweetLogPath):
-            os.remove(tweetLogPath)
+                await my_send_group_msg(group_id=group, message=currMsg)
+
         if tweetContent["screenshotPath"] is not None:
             os.remove(tweetContent["screenshotPath"])

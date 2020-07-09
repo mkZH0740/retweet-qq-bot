@@ -11,22 +11,22 @@ from .settingHelper import SERVER_URL, SCREENSHOT_PATH, BAIDU_API, BAIDU_SECRET
 
 def takeScreenshot(url: str, code: int):
     data = {"url": url, "code": code}
-    res = requests.post(url=f"{SERVER_URL}/screenshot", json=data)
     try:
+        res = requests.post(url=f"{SERVER_URL}/screenshot", json=data)
         result = json.loads(res.content.decode('utf-8'))
         return result
-    except json.JSONDecodeError:
+    except Exception:
         return None
 
 
 def addTranslation(url: str, code: int, translation: str, tag: str, style: str):
     data = {"url": url, "code": code, 
         "translation": translation, "tag": tag, "style": style}
-    res = requests.post(url=f"{SERVER_URL}/translation", json=data)
     try:
+        res = requests.post(url=f"{SERVER_URL}/translation", json=data)
         result = json.loads(res.content.decode('utf-8'))
         return result
-    except json.JSONDecodeError:
+    except Exception:
         return None
 
 

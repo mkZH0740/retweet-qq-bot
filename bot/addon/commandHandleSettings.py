@@ -29,6 +29,7 @@ async def commandEnable(session: CommandSession):
     try:
         manager.adjust_group_settings(group_id=session.event.group_id, 
             adjusted_value=validCommands)
+        await session.send("成功")
     except DatabaseError:
         await session.send("数据库错误！")
 
@@ -42,6 +43,7 @@ async def commandDisable(session: CommandSession):
     try:
         manager.adjust_group_settings(group_id=session.event.group_id, 
             adjusted_value=validCommands)
+        await session.send("成功")
     except DatabaseError:
         await session.send("数据库错误！")
 
@@ -59,6 +61,7 @@ async def commandAdduser(session: CommandSession):
     try:
         manager.add_user(screen_name=screen_name, user_id=user_id, 
             group_id=session.event.group_id)
+        await session.send("成功")
     except DatabaseError:
         session.finish("数据库错误！")
 
