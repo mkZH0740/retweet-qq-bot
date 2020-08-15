@@ -1,0 +1,43 @@
+.outerSpan{
+    margin-left: 0.075em; margin-right: 0.075em; margin-top: 0px; margin-bottom: 0px;
+    padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px;
+    left: 0px; top: 0px; right: 0px; bottom: 0px;
+    display: inline-block;
+    vertical-align: top;
+    position: relative;
+    height: 1em; width: 1.2em;
+}
+
+.firstDiv{
+    margin-left: 0px; margin-right: 0px; margin-top: 0px; margin-bottom: 0px;
+    padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px;
+    left: 0px; top: 0px; right: 0px; bottom: 0px;
+    flex-direction: column; flex-shrink: 0;
+    overflow: hidden, hidden;
+    display: inline-flex;
+    position: absolute;
+    z-index: 0;
+    height: 1.2em; width: 1.2em;
+}
+
+.secondDiv{
+    margin-left: 0px; margin-right: 0px; margin-top: 0px; margin-bottom: 0px;
+    padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px;
+    left: 0px; top: 0px; right: 0px; bottom: 0px;
+    flex-direction: column;
+    display: inline-flex;
+    position: absolute;
+    z-index: -1;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 100%, 100%;
+}
+
+.emoji{
+    margin-left: 0px; margin-right: 0px; margin-top: 0px; margin-bottom: 0px;
+    padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px;
+    left: 0px; top: 0px; right: 0px; bottom: 0px;
+    position: absolute;
+    z-index: -1;
+    height: 100%; width: 100%;
+}

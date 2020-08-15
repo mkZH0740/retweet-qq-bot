@@ -19,10 +19,10 @@
     pip install tweepy  
 
 需要的npm包:  
-    npm i twemoji  
-    npm i express  
-    npm i puppeteer  
-    npm i tmp
+    npm i @nestjs/cli
+    npm i @types/puppeteer-core
+    npm i @types/twemoji
+    npm i @types/tmp
 
 需要酷Q PRO
 

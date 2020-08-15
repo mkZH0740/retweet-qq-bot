@@ -1,14 +1,14 @@
 {
-    "server-url": "http://127.0.0.1:8000",
-    "project-path": "C:\\Users\\mike\\Desktop\\newProject",
+    "server-url": "your screenshot server address",
+    "project-path": "your project path",
     "twitter-api": {
-        "consumer-key": "",
-        "consumer-secret": "",
-        "access-token-key": "",
-        "access-token-secret": ""
+        "consumer-key": "your consumer key",
+        "consumer-secret": "your consumer secret",
+        "access-token-key": "your access token key",
+        "access-token-secret": "your access token secret"
     },
     "baidu-translation": {
-        "api": "",
-        "secret": ""
+        "api": "baidu translation api",
+        "secret": "baidu translation key"
     }
 }

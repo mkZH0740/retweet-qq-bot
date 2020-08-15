@@ -3,3 +3,6 @@
 *.ipr
 *.iml
 *.iws
+/server/node_modules/
+/server/dist/
+/server/src/cache/

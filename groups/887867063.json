@@ -1,10 +1,10 @@
 {
  "tweet": true,
  "retweet": true,
- "comment": false,
- "translation": true,
+ "comment": true,
+ "original_text": true,
+ "translate": true,
  "content": true,
- "no-report": false,
- "tag": "C:\\Users\\Administrator\\Desktop\\newProject\\groups\\887867063_tag.png",
- "css-text": "font-family:黑体;font-size:25px;color:black"
+ "tag_path": "C:\\Users\\Administrator\\Desktop\\screenshotBot\\groups\\tags\\default_tag.png",
+ "css_path": "C:\\Users\\Administrator\\Desktop\\screenshotBot\\groups\\css\\887867063_text.css"
 }

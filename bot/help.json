@@ -1,0 +1,14 @@
+{
+    "default": "目前已支持命令：add, enable, disable, translation(tr), tag, css, checkcss, help, freetranslate(ftr), screenshot;\n <>必选参数，[]可选参数",
+    "add": "加入监听推特用户，使用方法#add <twitter_id>;<screen_name>",
+    "enable": "打开对应功能，使用方法#enable <功能名>，目前支持[tweet(普通发推内容), retweet(转推内容), comment(评论内容), originalText(原文), translate(翻译), contentPicture(推内发出的图片)]",
+    "disable": "关闭对应功能，使用方法#disable <功能名>，目前支持[tweet(普通发推内容), retweet(转推内容), comment(评论内容), originalText(原文), translate(翻译), contentPicture(推内发出的图片)]",
+    "translation": "翻译推文，使用方法#translate <嵌字编号>，随后输入翻译文本块，如果是翻译回复推文，请使用#行号 来标记从上至下第几条的文本，例如\n#1 第一行内容\n#2 \n第二行内容\n#5 第五行内容",
+    "tag": "指定在推文主要内容位置嵌字的标签（在嵌字文本上面加一个小图片tag），使用方法#tag <图片>",
+    "css": "指定嵌字文本的样式，请输入标准css文本，使用方法#css .text{<css文本>}",
+    "checkcss": "获取当前使用的css文本，使用方法#checkcss",
+    "freetranslate": "根据推文url进行签字，使用方法#frt <url>，随后输入翻译文本块",
+    "screenshot": "根据推文url获取截图，使用方法#screenshot <url>，随后输入翻译文本块",
+    "help": "获取帮助文本，使用方法#help [命令名称]",
+    "new": "新增了[css, checkcss, freetranslate(ftr), screenshot]方法，移除了style方法。\n使用css直接使用css样式指定嵌字文本样式，checkcss查看当前使用的css样式，ftr使用url直接嵌字，screenshot使用url直接截图。\n（也许）修复了嵌评论时行标后不能换行的bug，修改了emoji在页面上的展示方法，现在emoji在文本中更加自然了。"
+}

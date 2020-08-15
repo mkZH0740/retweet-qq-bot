@@ -1,152 +1,117 @@
-from nonebot import scheduler, on_command, CommandSession, get_bot, MessageSegment
-from aiocqhttp import ActionFailed
-from tweepy import API, OAuthHandler, Stream
-
-from .listenerHelper import MyListener
-from .serverHelper import addTranslation, baiduTranslation
-from .settingHelper import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN_KEY, ACCESS_TOKEN_SECRET, PROJECT_PATH, GROUP_SETTING_PATH, TWEET_LOG_PATH
-from .databaseHelper import DBManager
-
-import json
 import os
+import json
 import requests
 
+from tweepy import OAuthHandler, API, Stream
+from aiocqhttp.exceptions import ActionFailed
+from nonebot import get_bot, CommandSession, on_command, MessageSegment, scheduler
+
+from .db_helper import read_group_settings, read_all_groups, add_user, add_group_log
+from .settings import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN_KEY, ACCESS_TOKEN_SECRET, SUCCEED_MSG, EXCEPTION_MSG, TWEET_LOG_PATH
+from .listener import MyStreamListener
+from .server import baidu_translation
+
+
 bot = get_bot()
-manager = DBManager()
 auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_TOKEN_KEY, ACCESS_TOKEN_SECRET)
 api = API(auth)
-currListener = MyListener(api=api)
-stream_holder = ['author: sudo & SoreHait']
-stream_holder[0] = Stream(api.auth, currListener)
-stream_holder[0].filter(follow=currListener.followedUsers, is_async=True)
+listener = MyStreamListener(api)
+stream_holder = [""]
+stream_holder[0] = Stream(auth=api.auth, listener=listener)
+stream_holder[0].filter(follow=listener.followers, is_async=True)
 
 
-async def my_send_group_msg(group_id: int, message: str):
+def get_twitter_id(screen_name: str) -> str:
+    res = requests.post(url="https://tweeterid.com/ajax.php", data=f"input={screen_name.lower()}", headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"}).content.decode("utf-8")
+    return res
+
+
+async def send_group_msgs(groups: list, msg: str):
+    """
+    包装发送群消息的函数
+    """
     try:
-        await bot.send_group_msg(group_id=group_id, message=message)
+        # 循环发送消息
+        while len(groups) > 0:
+            current_group = groups.pop()
+            await bot.send_group_msg(group_id=int(current_group), message=msg)
     except ActionFailed as e:
-        if e.retcode != -34:
-            await bot.send_group_msg(group_id=group_id, message="发送失败")
-        else:
-            print(f"在{group_id}被禁言！")
+        # 打印捕捉到的异常，跳过当前群继续执行
+        print(f"{e.retcode} @ {current_group}")
+        await send_group_msgs(groups, msg)
+
+def refresh_stream():
+    """
+    刷新当前的tweepy流
+    """
+    stream_holder[0].disconnect()
+    # 重取监听对象的twitter id
+    listener.reaload_followers()
+    stream_holder[0] = Stream(api.auth, listener)
+    stream_holder[0].filter(follow=listener.followers, is_async=True)
 
 
-@on_command("help", only_to_me=False)
-async def commandHelp(session: CommandSession):
-    with open(f"{PROJECT_PATH}\\help.json", "r", encoding="utf-8") as f:
-        helpContent = json.load(f)
-    targetCommand = session.current_arg_text.strip()
-    if len(targetCommand) == 0:
-        await session.send(message=helpContent['default'])
-    elif targetCommand in helpContent:
-        await session.send(message=helpContent[targetCommand])
+@on_command("announce", aliases='a', only_to_me=False)
+async def announce_command(session: CommandSession):
+    """
+    向所有存在监听对象的群发送消息
+    """
+    groups = read_all_groups()
+    await send_group_msgs(groups, session.current_arg_text.strip())
+
+
+@on_command("add", only_to_me=False)
+async def add_command(session: CommandSession):
+    screen_name = session.current_arg_text.strip()
+    twitter_id = get_twitter_id(screen_name)
+    if not twitter_id.isdigit():
+        session.finish("请输入正确的screen name")
+    if add_user(screen_name, twitter_id, str(session.event.group_id)):
+        refresh_stream()
+        session.finish(SUCCEED_MSG)
     else:
-        await session.send("该命令不存在！")
-
-
-@on_command("translation", aliases='tr', only_to_me=False)
-async def commandTranslate(session: CommandSession):
-    if session.is_first_run:
-        index = session.current_arg_text
-        if index.isdigit():
-            session.state["index"] = int(index)
-            session.get("translation", prompt="请输入翻译：")
-        else:
-            session.finish("嵌字编号必须是数字！")
-    else:
-        groupLog = manager.read_group_log(group_id=session.event.group_id, index=session.state["index"])
-        if groupLog is None:
-            session.finish(message="非法编号")
-        groupSetting = manager.read_group_settings(group_id=session.event.group_id)
-        result = addTranslation(groupLog["url"], groupLog["code"], session.state["translation"], 
-            groupSetting["tag"], groupSetting["css-text"])
-        print(result)
-        if result is None:
-            await session.send("服务器内部错误")
-        elif not result["status"]:
-            await session.send(result["reason"])
-        else:
-            try:
-                await session.send(MessageSegment.image(f"file:///{result['screenshotPath']}"))
-                os.remove(result['screenshotPath'])
-            except ActionFailed as e:
-                print(f"#tr 发生错误 => {e.retcode}")
-                await session.send("发送消息失败")
-
-
-@on_command("announce", only_to_me=False)
-async def commandAnnounce(session: CommandSession):
-    groups = manager.read_all_groups()
-    for group in groups:
-        try:
-            await bot.send_group_msg(group_id=group, message=session.current_arg_text)
-        except ActionFailed as e:
-            await session.send(message=f"发送{group}错误，代码{e.retcode}")
-
-
-@on_command("tag", only_to_me=False)
-async def commandChangeTag(session: CommandSession):
-    imgTag = session.current_arg_images
-    if len(imgTag) != 1:
-        session.finish(message="请输入一个tag图片！")
-    else:
-        img = requests.get(imgTag[0])
-        with open(f"{GROUP_SETTING_PATH}\\{session.event.group_id}_tag.png", "wb") as f:
-            f.write(img.content)
-        manager.adjust_group_settings(group_id=session.event.group_id, 
-            adjusted_value={"tag": f"{GROUP_SETTING_PATH}\\{session.event.group_id}_tag.png"})
-        await session.send("成功！")
+        session.finish(EXCEPTION_MSG)
 
 
 @scheduler.scheduled_job('interval', seconds=60)
-async def _():
-    cachedLogs = os.listdir(f"{TWEET_LOG_PATH}\\")
-    limit = min(5, len(cachedLogs))
-    if len(currListener.errList) > 0:
-        bufferedErrlist = []
-        while len(currListener.errList) > 0:
-            bufferedErrlist.append(currListener.errList.pop())
-        stream_holder[0].disconnect()
-        currListener.regenerate_followed_users()
-        stream_holder[0] = Stream(api.auth, currListener)
-        stream_holder[0].filter(follow=currListener.followedUsers, is_async=True)
-        await bot.send_private_msg(user_id=2267980149, message=f"出现错误 => {bufferedErrlist}")
-    
-    for i in range(limit):
-        tweetLogFile = cachedLogs.pop()
-        tweetLogPath = f"{TWEET_LOG_PATH}\\{tweetLogFile}"
-        if not os.path.exists(tweetLogPath):
+async def _schedule():
+    cached_logs = os.listdir(f"{TWEET_LOG_PATH}\\")
+    if len(listener.err_list) > 0:
+        current_err_list = listener.err_list.copy()
+        listener.err_list.clear()
+        refresh_stream()
+        await bot.send_private_msg(user_id=2267980149, message=f"出现错误 => {current_err_list}")
+    for _ in range(min(5, len(cached_logs))):
+        log_filename = cached_logs.pop()
+        log_path = f"{TWEET_LOG_PATH}\\{log_filename}"
+        if not os.path.exists(log_path):
             continue
+        with open(log_path, "r", encoding="utf-8") as f:
+            tweet_content = json.load(f)
+        os.remove(log_path)
 
-        with open(tweetLogPath, "r", encoding="utf-8") as f:
-            tweetContent = json.load(f)
-        os.remove(tweetLogPath)
-
-        groups = [int(group) for group in tweetContent["groups"]]
-
-        if tweetContent["screenshotPath"] is None:
-            errMessage = f"遇到错误 => {tweetContent['url']}处发生了{tweetContent['rawText']}"
-            for group in groups:
-                await my_send_group_msg(group_id=group, message=errMessage)
+        original_text = tweet_content["original_text"]
+        screenshot_path = tweet_content["screenshot_path"]
+        groups = list(tweet_content["groups"].keys())
+        if screenshot_path is None:
+            await send_group_msgs(groups, original_text)
         else:
-            screenshotMsg = str(MessageSegment.image(f"file:///{tweetContent['screenshotPath']}"))
-            mediaContentMsg = "".join([str(MessageSegment.image(url)) for url in tweetContent['mediaUrls']])
-            for group in groups:
-                currMsg = screenshotMsg + "\n"
-                currGroupConfig = tweetContent["groups"][str(group)]
-                if not currGroupConfig["no-report"]:
-                    currMsg += f"原文：{tweetContent['rawText']}\n"
-                    if currGroupConfig["translation"]:
-                        currMsg += f"翻译：{baiduTranslation(tweetContent['rawText'])}\n"
-                    if currGroupConfig["content"]:
-                        currMsg += mediaContentMsg
-                
-                index = manager.add_group_log(group_id=group, url=tweetContent["url"], code=tweetContent["code"])
-                currMsg += f"嵌字编号：{index}"
-                currMsg = currMsg.encode("utf-16", "surrogatepass").decode("utf-16")
-
-                await my_send_group_msg(group_id=group, message=currMsg)
-
-        if tweetContent["screenshotPath"] is not None:
-            os.remove(tweetContent["screenshotPath"])
+            screenshot_msg = str(MessageSegment.image(f"file:///{screenshot_path}"))
+            content_msg = "".join([str(MessageSegment.image(url)) for url in tweet_content['content_urls']])
+            for group, group_settings in tweet_content["groups"].items():
+                current_msg = screenshot_msg + "\n"
+                if group_settings["original_text"]:
+                    current_msg += f"原文: {original_text}\n"
+                if group_settings["translate"]:
+                    current_msg += f"翻译: {await baidu_translation(original_text)}\n"
+                if group_settings["content"] and current_msg!= "":
+                    current_msg += f"附件: {content_msg}\n"
+                index = add_group_log(group, tweet_content["url"])
+                current_msg += f"嵌字编号: {index}"
+                current_msg = str(current_msg).encode("utf-16", "surrogatepass").decode("utf-16")
+                try:
+                    await bot.send_group_msg(group_id=int(group), message=current_msg)
+                except ActionFailed as e:
+                    print(f"sending to @ {group} failed, retcode {e.retcode}")
+            os.remove(screenshot_path)
