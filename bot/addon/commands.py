@@ -125,7 +125,7 @@ async def translate_command(session: CommandSession):
         url = read_group_log(str(session.event.group_id),
                              session.state["index"])
         group_settings = group_setting_holder.get(str(session.event.group_id))
-        result = add_translation(
+        result = await add_translation(
             url, session.state["translation"], group_settings)
         if result.get("status", False):
             await session.send(str(MessageSegment.image(f"file:///{result['msg']}")))
@@ -140,7 +140,7 @@ async def screenshot_command(session: CommandSession):
     url = session.current_arg_text.strip()
     if check_is_url(url):
         session.finish("请输入正确的url")
-    result = take_screenshot(url)
+    result = await take_screenshot(url)
     if result.get("status", False):
         await session.send(str(MessageSegment.image(f"file:///{result['msg']}")) + f"\n原文：{result['content']}")
     else:
@@ -157,7 +157,7 @@ async def free_translate_command(session: CommandSession):
         session.get("translation", prompt="请输入翻译")
     try:
         group_settings = group_setting_holder.get(str(session.event.group_id))
-        result = add_translation(
+        result = await add_translation(
             session.state["url"], session.state["translation"], group_settings)
         if result.get("status", False):
             await session.send(str(MessageSegment.image(f"file:///{result['msg']}")))

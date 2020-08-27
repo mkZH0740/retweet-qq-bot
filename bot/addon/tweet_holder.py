@@ -36,10 +36,13 @@ class Tweet:
 async def send_with_retry(msg: str, group_id: int, time: int = 0):
     if time > 2:
         return
+    if SETTING.debug and time == 0:
+        print("============== sending ===============")
     try:
         await bot.send_group_msg(group_id=group_id, message=msg)
     except ActionFailed as e:
         if e.retcode == -11:
+            print("send failed -11, retrying")
             await send_with_retry(msg, group_id, time + 1)
         else:
             print(f"send failed, retcode={e.retcode} @ {group_id}")
