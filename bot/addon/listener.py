@@ -37,6 +37,11 @@ class MyListener(StreamListener):
 
         url = f"https://twitter.com/{screen_name}/status/{status_id}"
 
+        user = databse.get_user(screen_name)
+
+        if user is None:
+            print(f"WEIRD, {screen_name} is not in database")
+            return
         groups = databse.get_user(screen_name).groups
 
         tweet_type = "tweet"

@@ -7,7 +7,7 @@ class Settings:
     server_url: str
     project_path: str
 
-    log_path: str
+    group_log_path: str
     config_path: str
     group_tag_path: str
     group_css_path: str
@@ -29,7 +29,7 @@ class Settings:
         self.server_url = raw_settings["server-url"]
         self.project_path = raw_settings["project-path"]
 
-        self.log_path = f"{self.project_path}\\groups\\logs"
+        self.group_log_path = f"{self.project_path}\\groups\\logs"
         self.config_path = f"{self.project_path}\\bin\\config.db"
         self.group_tag_path = f"{self.project_path}\\groups\\tags"
         self.group_setting_path = f"{self.project_path}\\groups\\settings"

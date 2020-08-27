@@ -1,3 +1,4 @@
+import os
 import json
 import requests
 
@@ -132,6 +133,7 @@ async def translate_command(session: CommandSession):
             url, session.state["translation"], group_settings)
         if result.get("status", False):
             await session.send(str(MessageSegment.image(f"file:///{result['msg']}")))
+            os.remove(result["msg"])
         else:
             await session.send(result.get("msg", unknown_error))
     except RuntimeError as e:
@@ -145,7 +147,9 @@ async def screenshot_command(session: CommandSession):
         session.finish("请输入正确的url")
     result = await take_screenshot(url)
     if result.get("status", False):
-        await session.send(str(MessageSegment.image(f"file:///{result['msg']}")) + f"\n原文：{result['content']}")
+        text = result['content'].encode("utf-16", "surrogatepass").decode("utf-16")
+        await session.send(str(MessageSegment.image(f"file:///{result['msg']}")) + f"\n原文：{text}")
+        os.remove(result["msg"])
     else:
         await session.send(result.get("msg", unknown_error))
 
@@ -164,6 +168,7 @@ async def free_translate_command(session: CommandSession):
             session.state["url"], session.state["translation"], group_settings)
         if result.get("status", False):
             await session.send(str(MessageSegment.image(f"file:///{result['msg']}")))
+            os.remove(result["msg"])
         else:
             await session.send(result.get("msg", unknown_error))
     except RuntimeError as e:

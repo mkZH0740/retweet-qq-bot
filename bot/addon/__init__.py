@@ -20,7 +20,7 @@ stream_holder[0].filter(follow=listener.followed_users, is_async=True)
 
 wrapper = Wrapper()
 wrapper.load()
-wrapper.run()
+wrapper.start()
 
 
 def get_twitter_id(screen_name: str) -> str:
