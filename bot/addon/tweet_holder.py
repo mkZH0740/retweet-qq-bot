@@ -2,6 +2,7 @@ import json
 import threading
 import asyncio
 import os
+import random
 
 from queue import Queue
 from typing import List
@@ -33,22 +34,6 @@ class Tweet:
         self.tweet_log_path = tweet_log_path
 
 
-async def send_with_retry(msg: str, group_id: int, time: int = 0):
-    if time > 2:
-        return
-    if SETTING.debug and time == 0:
-        print("============== sending ===============")
-    try:
-        await bot.send_group_msg(group_id=group_id, message=msg)
-    except ActionFailed as e:
-        if e.retcode == -11:
-            print("send failed -11, retrying")
-            await send_with_retry(msg, group_id, time + 1)
-        else:
-            print(f"send failed, retcode={e.retcode} @ {group_id}")
-            return
-
-
 async def send_msg(success_result: dict, tweet: Tweet):
     screenshot_path = success_result["msg"]
     original_text = success_result["content"]
@@ -72,21 +57,30 @@ async def send_msg(success_result: dict, tweet: Tweet):
         group_log_index = add_group_log(group, tweet.url)
         current_msg += f"\n嵌字编号：{group_log_index}"
 
+        current_msg =  current_msg.replace("\\n", "\n")
         current_msg = current_msg.encode("utf-16", "surrogatepass").decode("utf-16")
 
-        await send_with_retry(screenshot_msg, int(group))
-        await send_with_retry(current_msg, int(group))
+        try:
+            await bot.send_group_msg(group_id=int(group), message=screenshot_msg + current_msg)
+        except ActionFailed as e:
+            if e.retcode == -11:
+                await bot.send_group_msg(group_id=int(group), message="网络波动，图片发送失败")
 
     print(f"SEND {tweet.url} finished!")
     if os.path.exists(tweet.tweet_log_path):
         os.remove(tweet.tweet_log_path)
+    if os.path.exists(screenshot_path):
+        os.remove(screenshot_path)
 
 
 async def send_fail_msg(failed_result: dict, tweet: Tweet):
     failed_msg = failed_result.get(
         "msg", f"unknown error occured on server @ {tweet.url}")
     for group in tweet.groups:
-        await send_with_retry(failed_msg, group_id=group)
+        try:
+            await bot.send_group_msg(group_id=int(group), message=failed_msg)
+        except ActionFailed as e:
+            print(f"send to {group} failed @ {e.retcode}")
 
 
 async def send_tweet(tweet: Tweet):
@@ -103,7 +97,25 @@ async def tweet_consumer():
     while True:
         print("asking for tweet")
         curr_tweet: Tweet = tweet_queue.get()
-        await send_tweet(curr_tweet)
+        solver = Solver()
+        solver.load(curr_tweet)
+        solver.start()
+        print(f"{curr_tweet.url} scheduled!")
+        await asyncio.sleep(random.randint(1, 3))
+
+
+class Solver(threading.Thread):
+    curr_tweet: Tweet
+
+    def load(self, curr_tweet: Tweet):
+        self.curr_tweet = curr_tweet
+    
+    def run(self):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        solver = asyncio.ensure_future(send_tweet(self.curr_tweet))
+        loop.run_until_complete(solver)
+        loop.close()
 
 
 class Wrapper(threading.Thread):
@@ -113,7 +125,7 @@ class Wrapper(threading.Thread):
         for tweet_filename in cached_tweet_filenames:
             with open(f"{SETTING.tweet_log_path}\\{tweet_filename}", "r", encoding="utf-8") as f:
                 curr_tweet_raw = json.load(f)
-            curr_tweet = Tweet(curr_tweet_raw["url"], curr_tweet_raw["tweet_type"], curr_tweet_raw["groups"], curr_tweet_raw["contents"], f"{SETTING.log_path}\\{tweet_filename}")
+            curr_tweet = Tweet(curr_tweet_raw["url"], curr_tweet_raw["tweet_type"], curr_tweet_raw["groups"], curr_tweet_raw["contents"], f"{SETTING.tweet_log_path}\\{tweet_filename}")
             tweet_queue.put(curr_tweet)
             if SETTING.debug:
                 print(f"CACHED TWEET {tweet_filename} LOADED!")

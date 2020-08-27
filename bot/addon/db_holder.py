@@ -9,7 +9,7 @@ from .settings import SETTING
 class User:
     screen_name: str
     user_id: str
-    groups: List[str]
+    groups: List[str] = []
 
     def __init__(self, screen_name: str, user_id: str):
         self.screen_name = screen_name
@@ -26,10 +26,10 @@ class User:
             self.groups[i] = str(group)
 
     def _generate_whole_value(self):
-        return (self.screen_name, self.user_id, ",".join(self.groups))
+        return (self.screen_name, self.user_id, ",".join(self.groups) + ",")
 
     def _generate_group_value(self) -> tuple:
-        return (",".join(self.groups), self.screen_name)
+        return (",".join(self.groups) + ",", self.screen_name)
 
 
 class Database:

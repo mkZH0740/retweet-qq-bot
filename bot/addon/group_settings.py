@@ -66,13 +66,19 @@ class GroupSettingHolder:
 
     def update(self, group_id: str, change: dict):
         target_group_setting: GroupSetting = self.group_settings.get(
-            group_id, GroupSetting(group_id))
+            group_id, None)
+        if target_group_setting is None:
+            print("none!")
+            target_group_setting = GroupSetting(group_id)
         target_group_setting.update(change)
         self.group_settings[group_id] = target_group_setting
 
     def get(self, group_id: str) -> dict:
         target_group_setting: GroupSetting = self.group_settings.get(
-            group_id, GroupSetting(group_id))
+            group_id, None)
+        if target_group_setting is None:
+            print("none!")
+            target_group_setting = GroupSetting(group_id)
         if group_id not in self.group_settings:
             self.group_settings[group_id] = target_group_setting
         return target_group_setting.group_setting

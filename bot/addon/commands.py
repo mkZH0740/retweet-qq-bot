@@ -1,13 +1,13 @@
 import json
 import requests
 
+from aiocqhttp import ActionFailed
 from nonebot import on_command, CommandSession, on_request, RequestSession, get_bot, MessageSegment
 
 from .group_settings import group_setting_holder
 from .group_log import read_group_log
 from .settings import SETTING
 from .db_holder import databse
-from .tweet_holder import send_with_retry
 from .server import add_translation, take_screenshot
 
 bot = get_bot()
@@ -34,7 +34,10 @@ def check_is_url(content: str):
 async def announce_command(session: CommandSession):
     all_groups = databse.read_all_groups()
     for group in all_groups:
-        await send_with_retry(session.current_arg_text.strip(), int(group))
+        try:
+            await bot.send_group_msg(group_id=int(group), message=session.current_arg_text.strip())
+        except ActionFailed as e:
+            print(f"{e.retcode} @ {group}")
 
 
 
