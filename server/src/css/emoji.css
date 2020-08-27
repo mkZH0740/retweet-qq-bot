@@ -1,4 +1,4 @@
-.outerSpan{
+.emoji-span{
     margin-left: 0.075em; margin-right: 0.075em; margin-top: 0px; margin-bottom: 0px;
     padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px;
     left: 0px; top: 0px; right: 0px; bottom: 0px;
@@ -8,7 +8,7 @@
     height: 1em; width: 1.2em;
 }
 
-.firstDiv{
+.emoji-div{
     margin-left: 0px; margin-right: 0px; margin-top: 0px; margin-bottom: 0px;
     padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px;
     left: 0px; top: 0px; right: 0px; bottom: 0px;
@@ -20,7 +20,7 @@
     height: 1.2em; width: 1.2em;
 }
 
-.secondDiv{
+.emoji-back{
     margin-left: 0px; margin-right: 0px; margin-top: 0px; margin-bottom: 0px;
     padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px;
     left: 0px; top: 0px; right: 0px; bottom: 0px;
@@ -33,11 +33,15 @@
     background-size: 100%, 100%;
 }
 
-.emoji{
+.emoji-fore{
     margin-left: 0px; margin-right: 0px; margin-top: 0px; margin-bottom: 0px;
     padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px;
     left: 0px; top: 0px; right: 0px; bottom: 0px;
     position: absolute;
     z-index: -1;
     height: 100%; width: 100%;
+}
+
+.tag-img{
+    height: 1.2em
 }

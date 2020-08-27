@@ -1,5 +1,5 @@
 {
-  "name": "server",
+  "name": "server-2",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -24,13 +24,16 @@
     "@nestjs/common": "^7.0.0",
     "@nestjs/core": "^7.0.0",
     "@nestjs/platform-express": "^7.0.0",
+    "@types/async-lock": "^1.1.2",
     "@types/puppeteer-core": "^2.0.0",
     "@types/tmp": "^0.2.0",
     "@types/twemoji": "^12.1.1",
+    "async-lock": "^1.2.4",
     "puppeteer-core": "^5.2.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.5.4",
+    "tmp": "^0.2.1",
     "twemoji": "^13.0.1"
   },
   "devDependencies": {

@@ -1,27 +1,35 @@
-import requests
 import json
 import random
-import hashlib
-import http
-import urllib
 import re
+import urllib
+import http
+import hashlib
 
-from .settings import SERVER_URL, BAIDU_API, BAIDU_SECRET
+from requests_futures.sessions import FuturesSession
 
-def add_translation(url: str, translation: str, group_settings: dict):
-    result = json.loads(requests.post(f"{SERVER_URL}/translate", json={
-                "url": url,
-                "translation": translation,
-                "tagPath": group_settings["tag_path"],
-                "cssPath": group_settings["css_path"]
-            }).content.decode("utf-8"))
-    return result
+from .group_settings import GroupSetting
+from .settings import SETTING
 
-def take_screenshot(url: str):
-    result = json.loads(requests.post(f"{SERVER_URL}/screenshot", json={
-                "url": url
-            }).content.decode("utf-8"))
-    return result
+session = FuturesSession()
+
+
+async def take_screenshot(url: str) -> dict:
+    get = session.get(f"{SETTING.server_url}/screenshot",
+                      json={"url": url}).result()
+    return json.loads(get.content.decode("utf-8"))
+
+
+async def add_translation(url: str, translation: str, group_setting: dict) -> dict:
+    post_data = {
+        "url": url,
+        "translation": translation,
+        "css-path": group_setting["css_path"],
+        "tag-path": group_setting["tag_path"]
+    }
+    post = session.post(
+        f"{SETTING.server_url}/translation", json=post_data).result()
+    return json.loads(post.content.decode("utf-8"))
+
 
 async def baidu_translation(content: str):
     http_client = None
@@ -31,12 +39,12 @@ async def baidu_translation(content: str):
     from_lang = 'auto'
     to_lang = 'zh'
     salt = random.randint(32768, 65536)
-    sign = str(BAIDU_API) + qaa + str(salt) + str(BAIDU_SECRET)
+    sign = SETTING.baidu_api + qaa + str(salt) + SETTING.baidu_secret
     m1 = hashlib.md5()
     m2 = sign.encode(encoding='utf-8')
     m1.update(m2)
     sign = m1.hexdigest()
-    myurl = myurl + '?appid=' + BAIDU_API + '&q=' + urllib.parse.quote(
+    myurl = myurl + '?appid=' + SETTING.baidu_api + '&q=' + urllib.parse.quote(
         qaa) + '&from=' + from_lang + '&to=' + to_lang + '&salt=' + str(salt) + '&sign=' + sign
     try:
         http_client = http.client.HTTPConnection('api.fanyi.baidu.com')

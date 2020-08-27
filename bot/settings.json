@@ -4,7 +4,7 @@
     "twitter-api": {
         "consumer-key": "your consumer key",
         "consumer-secret": "your consumer secret",
-        "access-token-key": "your access token key",
+        "access-token": "your access token key",
         "access-token-secret": "your access token secret"
     },
     "baidu-translation": {

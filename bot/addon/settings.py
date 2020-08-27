@@ -1,29 +1,47 @@
 import json
 
 
-with open("settings.json", "r", encoding="utf-8") as f:
-    SETTINGS = json.load(f)
+class Settings:
+    debug = True
 
-print(SETTINGS)
-DEBUG = True
-SERVER_URL = SETTINGS['server-url']
-PROJECT_PATH = SETTINGS['project-path']
+    server_url: str
+    project_path: str
 
-LOG_PATH = f"{PROJECT_PATH}\\groups\\logs"
-CONFIG_DB = f"{PROJECT_PATH}\\bin\\config.db"
-TAG_PATH = f"{PROJECT_PATH}\\groups\\tags"
-CSS_PATH = f"{PROJECT_PATH}\\groups\\css"
-GROUP_SETTING_PATH = f"{PROJECT_PATH}\\groups"
-TWEET_LOG_PATH = f"{PROJECT_PATH}\\cache"
+    log_path: str
+    config_path: str
+    group_tag_path: str
+    group_css_path: str
+    group_setting_path: str
+    tweet_log_path: str
 
-CONSUMER_KEY = SETTINGS['twitter-api']['consumer-key']
-CONSUMER_SECRET = SETTINGS['twitter-api']['consumer-secret']
-ACCESS_TOKEN_KEY = SETTINGS['twitter-api']['access-token-key']
-ACCESS_TOKEN_SECRET = SETTINGS['twitter-api']['access-token-secret']
+    consumer_key: str
+    consumer_secret: str
+    access_token: str
+    access_token_secret: str
 
-BAIDU_API = SETTINGS['baidu-translation']['api']
-BAIDU_SECRET = SETTINGS['baidu-translation']['secret']
+    baidu_api: str
+    baidu_secret: str
+
+    def __init__(self):
+        with open("settings.json", "r", encoding="utf-8") as f:
+            raw_settings = json.load(f)
+
+        self.server_url = raw_settings["server-url"]
+        self.project_path = raw_settings["project-path"]
+
+        self.log_path = f"{self.project_path}\\groups\\logs"
+        self.config_path = f"{self.project_path}\\bin\\config.db"
+        self.group_tag_path = f"{self.project_path}\\groups\\tags"
+        self.group_setting_path = f"{self.project_path}\\groups\\settings"
+        self.tweet_log_path = f"{self.project_path}\\cache"
+
+        self.consumer_key = raw_settings["twitter-api"]["consumer-key"]
+        self.consumer_secret = raw_settings["twitter-api"]["consumer-secret"]
+        self.access_token = raw_settings["twitter-api"]["access-token"]
+        self.access_token_secret = raw_settings["twitter-api"]["access-token-secret"]
+
+        self.baidu_api = raw_settings['baidu-translation']['api']
+        self.baidu_secret = raw_settings['baidu-translation']['secret']
 
 
-EXCEPTION_MSG = "未知错误，请查看console"
-SUCCEED_MSG = "成功"
+SETTING = Settings()
