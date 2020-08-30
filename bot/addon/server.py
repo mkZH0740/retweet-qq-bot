@@ -14,12 +14,24 @@ session = FuturesSession()
 
 
 async def take_screenshot(url: str) -> dict:
+    """
+    向服务端发送截图请求
+    :param url: 推文链接
+    :return: 服务端截图结果
+    """
     get = session.get(f"{SETTING.server_url}/screenshot",
                       json={"url": url}).result()
     return json.loads(get.content.decode("utf-8"))
 
 
 async def add_translation(url: str, translation: str, group_setting: dict) -> dict:
+    """
+    向服务端发送嵌字请求
+    :param url: 推文链接
+    :param translation: 翻译文本
+    :param group_setting: 群设置
+    :return: 服务端嵌字结果
+    """
     post_data = {
         "url": url,
         "translation": translation,
@@ -31,7 +43,13 @@ async def add_translation(url: str, translation: str, group_setting: dict) -> di
     return json.loads(post.content.decode("utf-8"))
 
 
-async def baidu_translation(content: str):
+async def baidu_translation(content: str) -> str:
+    """
+    百度翻译
+    :author: SoreHait ACE
+    :param content: 翻译内容
+    :return: 翻译结果
+    """
     http_client = None
     myurl = '/api/trans/vip/translate'
     qaa = str(content)

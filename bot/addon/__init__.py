@@ -24,7 +24,13 @@ wrapper.start()
 
 
 def get_twitter_id(screen_name: str) -> str:
-    res = requests.post(url="https://tweeterid.com/ajax.php", data=f"input={screen_name.lower()}", headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"}).content.decode("utf-8")
+    """
+    爬取screen name对应的twitter id，
+    :param screen_name: twitter用户的screen name
+    :return: 推特用户的twitter id
+    """
+    res = requests.post(url="https://tweeterid.com/ajax.php", data=f"input={screen_name.lower()}", headers={
+                        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"}).content.decode("utf-8")
     return res
 
 
@@ -44,6 +50,7 @@ async def add_command(session: CommandSession):
     screen_name = session.current_arg_text.strip()
     twitter_id = get_twitter_id(screen_name)
     if not twitter_id.isdigit():
+        # 错误的screen name会返回"error"
         session.finish("请输入正确的screen name")
     databse.add_user(screen_name, twitter_id, str(session.event.group_id))
     refresh_stream()
@@ -60,6 +67,9 @@ async def delete_command(session: CommandSession):
 
 @scheduler.scheduled_job('interval', seconds=60)
 async def _schedule():
+    """
+    每60秒检查streamlistener实例是否遇到错误并重启
+    """
     curr_errlist = listener.get_all_errors()
     if len(curr_errlist) > 0:
         refresh_stream()

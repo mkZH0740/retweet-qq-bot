@@ -2,6 +2,9 @@ import json
 
 
 class Settings:
+    """
+    该类保存bot运行的所有设置
+    """
     debug = True
 
     server_url: str
@@ -45,4 +48,5 @@ class Settings:
         self.baidu_secret = raw_settings['baidu-translation']['secret']
 
 
+# 全局设置代理
 SETTING = Settings()

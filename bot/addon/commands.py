@@ -41,12 +41,12 @@ async def announce_command(session: CommandSession):
             print(f"{e.retcode} @ {group}")
 
 
-
 @on_command("help", only_to_me=False)
 async def help_command(session: CommandSession):
     with open("help.json", "r", encoding="utf-8") as f:
         help_contents: dict = json.load(f)
     args = session.current_arg_text.strip()
+    # 按照args寻找对应帮助条目，不存在则返回默认条目
     content = help_contents.get(args, help_contents["default"])
     session.finish(content)
 
@@ -54,6 +54,7 @@ async def help_command(session: CommandSession):
 @on_command("enable", only_to_me=False)
 async def enable_command(session: CommandSession):
     keys = session.current_arg_text.split(";")
+    # 为每个args初始化值为True
     change = dict.fromkeys(keys, True)
     try:
         group_setting_holder.update(str(session.event.group_id), change)
@@ -66,6 +67,7 @@ async def enable_command(session: CommandSession):
 @on_command("disable", only_to_me=False)
 async def enable_command(session: CommandSession):
     keys = session.current_arg_text.split(";")
+    # 为每个args初始化值为False
     change = dict.fromkeys(keys, False)
     try:
         group_setting_holder.update(str(session.event.group_id), change)
@@ -147,7 +149,9 @@ async def screenshot_command(session: CommandSession):
         session.finish("请输入正确的url")
     result = await take_screenshot(url)
     if result.get("status", False):
-        text = result['content'].encode("utf-16", "surrogatepass").decode("utf-16")
+        # 文字中的emoji不能直接发送，必须进行转码
+        text = result['content'].encode(
+            "utf-16", "surrogatepass").decode("utf-16")
         await session.send(str(MessageSegment.image(f"file:///{result['msg']}")) + f"\n原文：{text}")
         os.remove(result["msg"])
     else:

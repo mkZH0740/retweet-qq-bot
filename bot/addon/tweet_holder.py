@@ -21,6 +21,9 @@ bot = get_bot()
 
 
 class Tweet:
+    """
+    该类包装了推文
+    """
     url: str
     tweet_type: str
     tweet_log_path: str
@@ -36,6 +39,12 @@ class Tweet:
 
 
 async def send_with_retry(msg: str, group_id: int, time: int = 0):
+    """
+    递归多次尝试发送，尝试解决-11因为网络问题无法发出图片
+    :param msg: 需要发出的消息
+    :param group_id: 群号
+    :param time: 3-time为重试次数
+    """
     if time > 2:
         return
     try:
@@ -49,6 +58,11 @@ async def send_with_retry(msg: str, group_id: int, time: int = 0):
 
 
 async def send_msg(success_result: dict, tweet: Tweet):
+    """
+    发送截图成功的消息
+    :param success_result: 服务端截图正确返回的内容
+    :param tweet: 当前处理的推文对象
+    """
     screenshot_path = success_result["msg"]
     original_text = success_result["content"]
     translated_text = await baidu_translation(original_text)
@@ -58,8 +72,10 @@ async def send_msg(success_result: dict, tweet: Tweet):
                    for content_url in tweet.contents]
 
     for group in tweet.groups:
+        # 为每个群分别构建消息
         group_setting = group_setting_holder.get(group)
         if not group_setting.get(tweet.tweet_type, False):
+            # 当前群没有监听此类消息，跳过
             continue
         current_msg = ""
         if group_setting["original_text"]:
@@ -71,11 +87,15 @@ async def send_msg(success_result: dict, tweet: Tweet):
         group_log_index = add_group_log(group, tweet.url)
         current_msg += f"\n嵌字编号：{group_log_index}"
 
-        current_msg =  current_msg.replace("\\n", "\n")
-        current_msg = current_msg.encode("utf-16", "surrogatepass").decode("utf-16")
+        # 将服务端替换的换行符替换回来
+        current_msg = current_msg.replace("\\n", "\n")
+        # 文字中的emoji不能直接发送，必须进行转码
+        current_msg = current_msg.encode(
+            "utf-16", "surrogatepass").decode("utf-16")
 
         await send_with_retry(screenshot_msg + current_msg, int(group))
 
+    # TODO: 此方法因为未知原因运行十分缓慢，且有时会长时间无法删除文件，需要优化
     print(f"SEND {tweet.url} finished!")
     if os.path.exists(tweet.tweet_log_path):
         os.remove(tweet.tweet_log_path)
@@ -84,6 +104,12 @@ async def send_msg(success_result: dict, tweet: Tweet):
 
 
 async def send_fail_msg(failed_result: dict, tweet: Tweet):
+    """
+    发送截图失败的消息
+    :param failed_result: 服务端截图失败返回的内容
+    :param tweet: 当前处理的推文对象
+    """
+    # 读取服务器故障信息，如果服务器没有返回，则为未知错误（不太可能发生
     failed_msg = failed_result.get(
         "msg", f"unknown error occured on server @ {tweet.url}")
     for group in tweet.groups:
@@ -91,6 +117,10 @@ async def send_fail_msg(failed_result: dict, tweet: Tweet):
 
 
 async def send_tweet(tweet: Tweet):
+    """
+    截图并发送推文
+    :param tweet: 当前处理的推文对象
+    """
     screenshot_result: dict = await take_screenshot(tweet.url)
     await asyncio.sleep(random.random())
     if screenshot_result.get("status", False):
@@ -102,31 +132,50 @@ async def send_tweet(tweet: Tweet):
 
 
 def start_loop(loop: asyncio.AbstractEventLoop):
+    """
+    在线程中启动asyncio事件循环
+    """
     asyncio.set_event_loop(loop)
     loop.run_forever()
 
 
 class Wrapper(threading.Thread):
+    """
+    该类包装推文消费者线程
+    """
 
     def load(self):
+        """
+        读取可能存在的缓存文件
+        """
         cached_tweet_filenames = os.listdir(SETTING.tweet_log_path)
         for tweet_filename in cached_tweet_filenames:
             with open(f"{SETTING.tweet_log_path}\\{tweet_filename}", "r", encoding="utf-8") as f:
                 curr_tweet_raw = json.load(f)
-            curr_tweet = Tweet(curr_tweet_raw["url"], curr_tweet_raw["tweet_type"], curr_tweet_raw["groups"], curr_tweet_raw["contents"], f"{SETTING.tweet_log_path}\\{tweet_filename}")
+            curr_tweet = Tweet(curr_tweet_raw["url"], curr_tweet_raw["tweet_type"], curr_tweet_raw["groups"],
+                               curr_tweet_raw["contents"], f"{SETTING.tweet_log_path}\\{tweet_filename}")
             tweet_queue.put(curr_tweet)
             if SETTING.debug:
                 print(f"CACHED TWEET {tweet_filename} LOADED!")
-    
+
     def run(self):
+        """
+        运行推文消费者线程
+        """
+        # 初始化新的事件循环
         loop = asyncio.new_event_loop()
+        # 初始化事件循环线程
         loop_thread = threading.Thread(target=start_loop, args=(loop,))
         loop_thread.start()
 
         while True:
-            print("===========================ASKING FOR TWEET===========================")
+            print(
+                "===========================ASKING FOR TWEET===========================")
+            # 从队列中给拉取推文，如果没有则会阻塞线程
             curr_tweet: Tweet = tweet_queue.get()
             scheduled_coro = send_tweet(curr_tweet)
+            # 在事件线程中运行发送函数
             asyncio.run_coroutine_threadsafe(scheduled_coro, loop)
             print(f"{curr_tweet.url} scheduled!")
+            # 休息一下
             time.sleep(random.randint(1, 3))
