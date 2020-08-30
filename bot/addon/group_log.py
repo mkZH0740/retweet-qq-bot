@@ -9,7 +9,7 @@ def add_group_log(group_id: str, url: str) -> int:
         open(log_path, "w", encoding="utf-8")
     with open(log_path, "r+", encoding="utf-8") as f:
         previous_content = f.readlines()
-    previous_content.append(url)
+    previous_content.append(f"{url}\n")
     index = len(previous_content)
     if index > 5000:
         with open(log_path, "w", encoding="utf-8") as f:

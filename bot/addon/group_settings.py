@@ -38,7 +38,7 @@ class GroupSetting:
         for k, v in change.items():
             previous_setting = self.group_setting.get(k, None)
             if previous_setting is not None and v != previous_setting:
-                previous_setting[k] = v
+                self.group_setting[k] = v
                 need_update = True
         if need_update:
             self._write_group_setting()
