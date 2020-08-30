@@ -11,7 +11,7 @@ default_group_setting = {
     "translate": True,
     "content": True,
     "tag_path": f"{SETTING.group_tag_path}\\default_tag.png",
-    "css_path": f"{SETTING.group_tag_path}\\default_text.css"
+    "css_path": f"{SETTING.group_css_path}\\default_text.css"
 }
 
 

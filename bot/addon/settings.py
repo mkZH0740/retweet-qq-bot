@@ -32,6 +32,7 @@ class Settings:
         self.group_log_path = f"{self.project_path}\\groups\\logs"
         self.config_path = f"{self.project_path}\\bin\\config.db"
         self.group_tag_path = f"{self.project_path}\\groups\\tags"
+        self.group_css_path = f"{self.project_path}\\groups\\css"
         self.group_setting_path = f"{self.project_path}\\groups\\settings"
         self.tweet_log_path = f"{self.project_path}\\cache"
 
