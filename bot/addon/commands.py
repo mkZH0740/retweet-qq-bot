@@ -3,7 +3,7 @@ import json
 import requests
 
 from aiocqhttp import ActionFailed
-from nonebot import on_command, CommandSession, on_request, RequestSession, get_bot, MessageSegment
+from nonebot import on_command, CommandSession, on_request, RequestSession, get_bot, MessageSegment, permission
 
 from .group_settings import group_setting_holder
 from .group_log import read_group_log
@@ -31,7 +31,7 @@ def check_is_url(content: str):
     return (content.startswith("https://twitter.com") or content.startswith("https://mobile.twitter.com"))
 
 
-@on_command("announce", only_to_me=False)
+@on_command("announce", only_to_me=False, permission=permission.SUPERUSER)
 async def announce_command(session: CommandSession):
     all_groups = databse.read_all_groups()
     for group in all_groups:
